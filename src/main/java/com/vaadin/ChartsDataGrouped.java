@@ -1,7 +1,7 @@
 package com.vaadin;
 
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class ChartsDataGrouped extends ChartsData {
     public ChartsDataGrouped() {
         super();
 
-        weatherByMonth = new HashMap<String, List<WeatherInfo>>();
+        weatherByMonth = new LinkedHashMap<String, List<WeatherInfo>>();
 
         for (WeatherInfo wi : getWeatherData()) {
             String month = new SimpleDateFormat("MMMM").format(wi.getDate());
@@ -26,7 +26,7 @@ public class ChartsDataGrouped extends ChartsData {
             weatherByMonth.get(month).add(wi);
         }
 
-        weatherMeanTempByMonth = new HashMap<String, Double>();
+        weatherMeanTempByMonth = new LinkedHashMap<String, Double>();
 
         for (Map.Entry<String, List<WeatherInfo>> month : weatherByMonth
                 .entrySet()) {

@@ -1,21 +1,22 @@
 package com.vaadin;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.addon.charts.Chart;
+import com.vaadin.addon.charts.DrilldownCallback;
+import com.vaadin.addon.charts.DrilldownEvent;
 import com.vaadin.addon.charts.model.AxisType;
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
-import com.vaadin.addon.charts.model.ContainerDataSeries;
 import com.vaadin.addon.charts.model.DataSeries;
 import com.vaadin.addon.charts.model.DataSeriesItem;
 import com.vaadin.addon.charts.model.Series;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.UI;
@@ -45,7 +46,7 @@ public class ChartsTutorial extends UI {
         Configuration conf = chart.getConfiguration();
         conf.setTitle("Monthly mean temperatures in Turku, Finland 2013");
 
-        conf.getChart().setType(ChartType.LINE);
+        conf.getChart().setType(ChartType.COLUMN);
 
         DataSeries temp = createDrillDownDataSeriesSync(data);
 
@@ -68,10 +69,10 @@ public class ChartsTutorial extends UI {
             double meanForMonth = entry.getValue();
             DataSeriesItem dsi = new DataSeriesItem(month, meanForMonth);
 
-            ContainerDataSeries drillDownSeries = createSeriesForMonth(data,
-                    month);
+            Series drillDownSeries = createSeriesForMonth(data, month);
+            drillDownSeries.setId(month);
 
-            dsi.addItemWithDrillDown(dsi, drillDownSeries);
+            temp.addItemWithDrilldown(dsi, drillDownSeries);
         }
 
         return temp;
@@ -88,7 +89,7 @@ public class ChartsTutorial extends UI {
             double meanForMonth = entry.getValue();
             DataSeriesItem dsi = new DataSeriesItem(month, meanForMonth);
             dsi.setId(month);
-            dsi.addItemWithDrillDown(dsi);
+            temp.addItemWithDrilldown(dsi);
         }
 
         chart.setDrilldownCallback(new DrilldownCallback() {
@@ -102,16 +103,18 @@ public class ChartsTutorial extends UI {
         return temp;
     }
 
-    private ContainerDataSeries createSeriesForMonth(ChartsDataGrouped data,
-            String month) {
+    private Series createSeriesForMonth(ChartsDataGrouped data, String month) {
         List<ChartsData.WeatherInfo> weatherInfosForThisMonth = data
                 .getWeatherByMonth().get(month);
-        BeanItemContainer<ChartsData.WeatherInfo> weatherInfoContainer = new BeanItemContainer<ChartsData.WeatherInfo>(
-                ChartsData.WeatherInfo.class, weatherInfosForThisMonth);
-        ContainerDataSeries drillDownSeries = new ContainerDataSeries(
-                weatherInfoContainer);
-        drillDownSeries.setXPropertyId("date");
-        drillDownSeries.setYPropertyId("meanTemp");
+
+        DataSeries drillDownSeries = new DataSeries();
+        drillDownSeries.setName("Temperature for " + month);
+        for (ChartsData.WeatherInfo wi : weatherInfosForThisMonth) {
+            String day = new SimpleDateFormat("dd").format(wi.getDate());
+
+            drillDownSeries.add(new DataSeriesItem(day, wi.getMeanTemp()));
+        }
+
         return drillDownSeries;
     }
 }
