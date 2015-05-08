@@ -1,7 +1,7 @@
 Vaadin Charts Tutorial
 =========================
 
-This is the final code produced by the Vaadin Charts Tutorial.
+This is the final code produced by the Vaadin Charts Drill-Down Tutorial.
 
 
 Running the example
